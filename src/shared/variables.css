@@ -1,0 +1,55 @@
+:root {
+  /* ── Primary Accent: Warm Teal ── */
+  --accent:#0C8C7F;--accent-h:#0A756A;--accent-lt:#E6F5F3;--accent-g:rgba(12,140,127,.05);--accent-gw:rgba(12,140,127,.14);
+
+  /* ── Typography Colors ── */
+  --ink:#1C1917;--ink2:#292524;--sub:#78716C;--dim:#A8A29E;--mute:#D6D3D1;
+
+  /* ── Surfaces ── */
+  --line:#E7E5E4;--line2:#F5F5F4;
+  --bg:#F2EFEB;--card:#FAFAF8;--card-h:#F5F4F2;
+
+  /* ── Semantic ── */
+  --ok:#15803D;--ok-bg:#F0FDF4;--warn:#B45309;--warn-bg:#FFFBEB;
+  --err:#B91C1C;--err-bg:#FEF2F2;--purple:#6D28D9;--purple-bg:#F5F3FF;
+  --blue:#1D4ED8;--blue-bg:#EFF6FF;
+
+  /* ── Shadows ── */
+  --sh:0 1px 3px rgba(28,25,23,.06),0 4px 12px rgba(28,25,23,.04);
+  --sh-md:0 4px 8px -1px rgba(28,25,23,.07),0 10px 20px -2px rgba(28,25,23,.05);
+  --sh-lg:0 10px 25px -5px rgba(28,25,23,.08),0 20px 48px -8px rgba(28,25,23,.06);
+  --sh-xl:0 20px 50px -12px rgba(28,25,23,.14);
+
+  /* ── Radii ── */
+  --r:12px;--r-md:16px;--r-lg:20px;--r-xl:24px;--r-full:9999px;
+
+  /* ── Fonts ── */
+  --font:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --fd:'Outfit',sans-serif;
+  --fs:'Playfair Display',serif;
+
+  /* ── Easing ── */
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ── Dark Theme ── */
+html[data-theme="dark"] {
+  --accent:#34D399;--accent-h:#22C55E;--accent-lt:#052e16;--accent-g:rgba(52,211,153,.06);--accent-gw:rgba(52,211,153,.12);
+  --ink:#FAFAF9;--ink2:#E7E5E4;--sub:#A8A29E;--dim:#78716C;--mute:#44403C;
+  --line:#292524;--line2:#1C1917;--bg:#0F0E0D;--card:#1A1918;--card-h:#211F1E;
+  --ok-bg:#052e16;--warn-bg:#1c1000;--err-bg:#1f0808;--purple-bg:#1a0a3e;--blue-bg:#0a1a3e;
+  --sh:0 2px 8px rgba(0,0,0,.4);--sh-md:0 4px 16px rgba(0,0,0,.45);--sh-lg:0 8px 30px rgba(0,0,0,.5);--sh-xl:0 20px 50px rgba(0,0,0,.6);
+}
+
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden}
+button,select,input,textarea{font-family:inherit;outline:none;border:none}
+a{text-decoration:none;color:inherit}
+html{scroll-behavior:smooth}
+::selection{background:var(--accent-lt);color:var(--accent-h)}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--mute);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--dim)}

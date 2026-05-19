@@ -1,0 +1,72 @@
+/* ── Товч ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:.2s var(--ease);border:none}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(13,148,136,.2),0 4px 12px rgba(13,148,136,.15)}
+.btn-p:hover{background:var(--accent-h);transform:translateY(-1px)}
+.btn-s{background:transparent;color:var(--ink2);border:1.5px solid var(--line)}
+.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+.btn-full{width:100%}
+
+/* ── Sticky дээд мөр ── */
+.sched-sticky{background:rgba(242,239,235,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:44px;z-index:50}
+html[data-theme="dark"] .sched-sticky{background:rgba(15,14,13,.94)}
+.sched-back{padding:8px 18px;border-radius:var(--r-full);border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;color:var(--sub);cursor:pointer}
+.sched-back:hover{border-color:var(--accent);color:var(--accent)}
+.sched-title{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink)}
+
+/* ── Горим сонгогч ── */
+.mode-group{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:auto}
+.sm-btn{padding:8px 18px;font-size:12px;font-weight:700;border:none;background:transparent;color:var(--dim);cursor:pointer;transition:.15s}
+.sm-btn.on{background:var(--card);color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+
+/* ── Үндсэн хуудас ── */
+.sched-page{max-width:920px;margin:0 auto;padding:28px 24px 60px}
+.sched-h{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-0.5px;color:var(--ink);margin-bottom:4px}
+.sched-sub{font-size:14px;color:var(--sub)}
+
+/* ── Тайлбар ── */
+.sched-hint{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:var(--accent-g);border:1px solid var(--accent-gw);border-radius:var(--r);padding:12px 18px;margin-bottom:16px}
+.sh-item{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--ink2)}
+.sh-sw{width:16px;height:16px;border-radius:4px;flex-shrink:0}
+.sh-f{background:#22C55E}
+.sh-b{background:#F59E0B}
+.sh-e{background:var(--bg);border:1.5px solid var(--line)}
+.sh-div{width:1px;height:20px;background:var(--line)}
+
+/* ── Schedule grid ── */
+.sched-wrap{background:var(--card);border-radius:var(--r-md);border:1px solid var(--line);overflow:hidden;box-shadow:var(--sh);user-select:none}
+.sg-head{display:grid;grid-template-columns:56px repeat(7,1fr)}
+.sg-corner{background:var(--bg);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sg-day{background:var(--bg);border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:10px 4px;text-align:center;font-size:11px;font-weight:800;color:var(--sub)}
+.sg-day.today{color:var(--accent)}
+.sg-body{display:flex;flex-direction:column}
+.sg-row{display:grid;grid-template-columns:56px repeat(7,1fr)}
+.sg-time{background:var(--bg);border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;height:36px;font-size:10px;color:var(--mute);font-weight:600}
+.sg-cell{height:36px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);cursor:crosshair;transition:background .1s}
+.sg-cell:hover{background:var(--accent-g)}
+.sg-cell.f{background:rgba(34,197,94,.3)}
+.sg-cell.f:hover{background:rgba(34,197,94,.5)}
+.sg-cell.b{background:rgba(245,158,11,.3)}
+.sg-cell.b:hover{background:rgba(245,158,11,.5)}
+
+/* ── Статистик ── */
+.sched-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.ss-card{background:var(--card);border-radius:var(--r);border:1px solid var(--line);padding:20px;text-align:center}
+.ss-n{font-family:var(--fd);font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
+.ss-n.cyan{color:#16A34A}
+.ss-n.sky{color:#D97706}
+.ss-n.mint{color:var(--ok)}
+.ss-l{font-size:12px;color:var(--sub);font-weight:500}
+
+/* ── Товчнууд ── */
+.sched-btns{display:flex;gap:12px;margin-top:20px}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .sched-page{padding:20px 12px 40px}
+  .sched-hint{flex-direction:column;gap:10px;align-items:flex-start}
+  .sh-div{display:none}
+  .sg-time{font-size:8px;padding-right:4px}
+  .sg-day{font-size:9px;padding:8px 2px}
+  .sg-head{grid-template-columns:40px repeat(7,1fr)}
+  .sg-row{grid-template-columns:40px repeat(7,1fr)}
+}

@@ -1,0 +1,55 @@
+{
+  "currentPlan": "free",
+  "plans": [
+    {
+      "id": "free",
+      "name": "Үнэгүй",
+      "price": 0,
+      "priceLabel": "₮0",
+      "period": "үүрд үнэгүй",
+      "highlighted": false,
+      "features": [
+        { "text": "Долоо хоногт 10 холболт",   "included": true  },
+        { "text": "1:1 чат",                    "included": true  },
+        { "text": "Хуваарь тохируулах",         "included": true  },
+        { "text": "# general суваг",            "included": true  },
+        { "text": "Бүлгийн чат",                "included": false },
+        { "text": "Хэн үзсэнийг харах",         "included": false }
+      ]
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "price": 4900,
+      "priceLabel": "₮4,900",
+      "period": "/ сар",
+      "periodSub": "Кофены үнэ ☕",
+      "highlighted": true,
+      "badge": "🔥 ОЮУТНУУДЫН СОНГОЛТ",
+      "features": [
+        { "text": "Хязгааргүй холболт",               "included": true  },
+        { "text": "Бүлгийн чат (5 хүртэл)",            "included": true  },
+        { "text": "Хэн профайл үзсэнийг харах",        "included": true  },
+        { "text": "Мессеж уншсан эсэх (✓✓)",           "included": true  },
+        { "text": "Discover-д эхэнд харагдах",         "included": true  },
+        { "text": "Эвент үүсгэх",                      "included": false }
+      ]
+    },
+    {
+      "id": "proplus",
+      "name": "Pro+",
+      "price": 8900,
+      "priceLabel": "₮8,900",
+      "period": "/ сар · бүх боломж",
+      "highlighted": false,
+      "features": [
+        { "text": "Pro-ийн бүх боломж",                  "included": true },
+        { "text": "Хязгааргүй бүлгийн чат",              "included": true },
+        { "text": "Уулзалт/эвент зохион байгуулах",      "included": true },
+        { "text": "Хуваарийн дэлгэрэнгүй шинжилгээ",    "included": true },
+        { "text": "Нэмэлт профайл тохиргоо",             "included": true },
+        { "text": "Pro+ badge ✦",                         "included": true }
+      ]
+    }
+  ]
+}

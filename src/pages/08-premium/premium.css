@@ -1,0 +1,50 @@
+/* ── Товч ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:.2s var(--ease);border:none}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(13,148,136,.2),0 4px 12px rgba(13,148,136,.15)}
+.btn-p:hover{background:var(--accent-h);transform:translateY(-1px);box-shadow:0 4px 16px rgba(13,148,136,.3)}
+.btn-s{background:transparent;color:var(--ink2);border:1.5px solid var(--line)}
+.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+.btn-full{width:100%}
+.btn:active{transform:scale(.97)!important;transition:transform .1s}
+
+/* ── Premium хуудас ── */
+.prem-page{max-width:900px;margin:0 auto;padding:64px 24px 80px;text-align:center}
+
+/* ── Badge ── */
+.prem-badge{display:inline-flex;align-items:center;gap:8px;background:var(--warn-bg);border:1px solid rgba(217,119,6,.15);border-radius:var(--r-full);padding:8px 18px;font-size:13px;font-weight:700;color:var(--warn);margin-bottom:32px}
+
+/* ── Гарчиг ── */
+.prem-h{font-family:var(--fd);font-size:clamp(36px,6vw,64px);font-weight:800;letter-spacing:-2px;color:var(--ink);margin-bottom:12px;line-height:1.05}
+.prem-h em{font-family:var(--fs);font-style:italic;color:var(--accent)}
+.prem-sub{font-size:16px;color:var(--sub);margin-bottom:48px;line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto}
+
+/* ── Үнийн grid ── */
+.price-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px;text-align:left}
+.pc{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-md);padding:28px 24px;position:relative;transition:.3s}
+.pc:hover{border-color:var(--accent-gw);transform:translateY(-4px);box-shadow:var(--sh-md)}
+.pc.best{border-color:var(--accent);background:var(--accent-g)}
+
+/* ── Popular badge ── */
+.pc-pop{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:4px 14px;border-radius:var(--r-full);white-space:nowrap}
+
+/* ── Үнийн мэдээлэл ── */
+.pc-plan{font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;margin-bottom:14px}
+.pc-amt{font-family:var(--fd);font-size:40px;font-weight:800;letter-spacing:-1px;color:var(--ink);margin-bottom:4px}
+.pc-per{font-size:13px;color:var(--sub);margin-bottom:24px}
+.pc-coffee{background:var(--ok-bg);color:var(--ok);font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--r-full)}
+
+/* ── Feature жагсаалт ── */
+.pc-feat{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.pc-feat li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+.pf-yes{color:var(--ok)}
+.pf-no{color:var(--mute)}
+.pf-no+span{color:var(--mute)}
+
+/* ── Тайлбар ── */
+.prem-note{font-size:13px;color:var(--dim);display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  .price-grid{grid-template-columns:1fr}
+  .prem-page{padding:40px 16px 60px}
+}

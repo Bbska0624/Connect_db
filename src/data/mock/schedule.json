@@ -1,0 +1,15 @@
+{
+  "userId": 1,
+  "cells": [
+    { "day": 1, "hour": 9,  "type": "b" },
+    { "day": 1, "hour": 10, "type": "b" },
+    { "day": 1, "hour": 11, "type": "b" },
+    { "day": 3, "hour": 8,  "type": "b" },
+    { "day": 3, "hour": 9,  "type": "b" },
+    { "day": 2, "hour": 14, "type": "f" },
+    { "day": 2, "hour": 15, "type": "f" },
+    { "day": 4, "hour": 10, "type": "f" },
+    { "day": 4, "hour": 11, "type": "f" },
+    { "day": 5, "hour": 14, "type": "f" }
+  ]
+}

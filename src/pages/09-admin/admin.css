@@ -1,0 +1,102 @@
+/* ── Товч ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:.2s var(--ease);border:none}
+
+/* ── Admin хуудас ── */
+.admin-pg{padding:28px;min-height:calc(100vh - 44px)}
+
+/* ── Дээд хэсэг ── */
+.adm-hd{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.adm-label{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.adm-title{font-family:var(--fd);font-size:28px;font-weight:800;letter-spacing:-0.5px;color:var(--ink)}
+.adm-sub{font-size:13px;color:var(--sub);margin-top:4px}
+.adm-date{background:var(--card);border:1px solid var(--line);border-radius:var(--r-full);padding:8px 16px;font-size:12px;font-weight:600;color:var(--ink2)}
+
+/* ── KPI мөр ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:22px 20px;transition:.2s}
+.kpi:hover{box-shadow:var(--sh-md);transform:translateY(-2px);border-color:var(--accent-gw)}
+.kpi-ico{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.ki-a{background:var(--accent-lt)}
+.ki-b{background:var(--blue-bg)}
+.ki-w{background:var(--warn-bg)}
+.ki-g{background:var(--ok-bg)}
+.kpi-l{font-size:12px;font-weight:500;color:var(--sub);margin-bottom:6px}
+.kpi-n{font-family:var(--fd);font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.kn-a{color:var(--accent)}
+.kn-b{color:var(--blue)}
+.kn-w{color:var(--warn)}
+.kn-g{color:var(--ok)}
+.kpi-ch{font-size:11px;font-weight:700;color:var(--ok)}
+.kpi-ch.neg{color:var(--err)}
+
+/* ── Үндсэн grid ── */
+.adm-grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+.adm-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.adm-ch{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.adm-ct{font-size:14px;font-weight:700;color:var(--ink)}
+.adm-ch-sub{font-size:12px;color:var(--sub);font-weight:600}
+
+/* ── Chart ── */
+.chart-area{padding:16px 20px 12px;display:flex;align-items:flex-end;gap:7px;height:180px}
+.cb2{flex:1;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--accent) 0%,rgba(13,148,136,.1) 100%);transition:.2s;cursor:pointer;position:relative}
+.cb2:hover{filter:brightness(1.1)}
+.cb2-val{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:.15s}
+.cb2:hover .cb2-val{opacity:1}
+.chart-days{display:flex;padding:0 20px 12px;gap:7px}
+.cd{flex:1;text-align:center;font-size:10px;font-weight:600;color:var(--mute)}
+
+/* ── Хүснэгт ── */
+.adm-inp{border:1px solid var(--line);border-radius:var(--r);padding:7px 12px;font-size:13px;color:var(--ink);background:var(--card);font-family:inherit}
+.adm-inp:focus{border-color:var(--accent);outline:none}
+.adm-table{width:100%;border-collapse:collapse}
+.adm-th{padding:10px 14px;font-size:10px;font-weight:800;color:var(--mute);text-align:left;letter-spacing:.5px;text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--line)}
+.adm-td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink2)}
+.adm-tr:hover .adm-td{background:var(--accent-g)}
+.uc{display:flex;align-items:center;gap:10px}
+.ua{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent-lt),var(--accent));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.un{font-size:13px;font-weight:700;color:var(--ink)}
+.ue{font-size:10px;color:var(--mute)}
+
+/* ── Badge ── */
+.badge{display:inline-flex;padding:3px 10px;border-radius:var(--r-full);font-size:10px;font-weight:700}
+.bg-prem{background:var(--warn-bg);color:var(--warn)}
+.bg-free{background:var(--bg);color:var(--sub);border:1px solid var(--line)}
+.bg-ok{background:var(--ok-bg);color:var(--ok)}
+.bg-bad{background:var(--err-bg);color:var(--err)}
+
+/* ── Үйлдлийн товч ── */
+.adm-act{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:.15s;margin-right:4px}
+.aa-view{background:var(--bg);color:var(--sub);border:1px solid var(--line)}
+.aa-view:hover{background:var(--blue-bg);color:var(--blue)}
+.aa-block{background:var(--err-bg);color:var(--err)}
+.aa-block:hover{background:rgba(220,38,38,.15)}
+
+/* ── Гомдлууд ── */
+.rep-list{padding:4px 0}
+.rep-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:.15s;border-left:3px solid transparent}
+.rep-item:hover{background:var(--accent-g);border-left-color:var(--accent)}
+.rep-ico{width:34px;height:34px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.rep-t{font-size:13px;font-weight:600;color:var(--ink)}
+.rep-s{font-size:11px;color:var(--sub);margin-top:2px}
+.rep-st{margin-left:auto;flex-shrink:0}
+
+/* ── Үзүүлэлтүүд ── */
+.qs-list{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.qs-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--line)}
+.qs-l{font-size:12px;font-weight:500;color:var(--sub)}
+.qs-n{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.qs-a{color:var(--accent)}
+.qs-b{color:var(--blue)}
+.qs-c{color:var(--warn)}
+.qs-d{color:var(--ok)}
+
+/* ── Responsive ── */
+@media(max-width:1024px){
+  .adm-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .kpi-row{grid-template-columns:1fr 1fr;gap:10px}
+  .kpi{padding:16px 14px}
+  .kpi-n{font-size:28px}
+  .admin-pg{padding:16px}
+}
