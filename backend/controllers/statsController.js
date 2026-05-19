@@ -10,16 +10,21 @@ const fail = (res, message, status = 400) =>
 // GET /api/stats  (public — no auth needed)
 export const getStats = async (_req, res) => {
   try {
-    const [activeUsers, totalConnections] = await Promise.all([
+    const [activeUsers, totalConnections, totalActions] = await Promise.all([
       User.countDocuments({ status: 'active' }),
       Connection.countDocuments({ action: 'connect' }),
+      Connection.countDocuments(),
     ]);
+
+    // matchRate = what % of swipe actions resulted in a connect
+    const matchRate = totalActions > 0
+      ? Math.round((totalConnections / totalActions) * 100)
+      : 0;
 
     return ok(res, {
       activeUsers,
-      matchRate:        89,   // % — would be computed from schedule overlaps in production
+      matchRate,
       totalConnections,
-      rating:           4.8,
     });
   } catch (err) {
     return fail(res, err.message, 500);

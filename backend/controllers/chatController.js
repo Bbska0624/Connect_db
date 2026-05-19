@@ -98,6 +98,7 @@ export const sendMessage = async (req, res) => {
   try {
     const { text } = req.body;
     if (!text || !text.trim()) return fail(res, 'Мессеж хоосон байна');
+    if (text.trim().length > 2000) return fail(res, 'Мессеж 2000 тэмдэгтээс хэтрэхгүй байх ёстой');
 
     const newMsg = await Message.create({
       senderId:   req.user._id,
@@ -126,7 +127,6 @@ export const getPeople = async (req, res) => {
     const shaped = people.map(p => ({
       id:          p._id,
       name:        p.name,
-      age:         20,                      // not stored — placeholder
       avatar:      p.avatar,
       avatarStyle: p.avatarStyle,
       mbti:        p.mbti,
@@ -160,6 +160,7 @@ export const sendGeneralMessage = async (req, res) => {
   try {
     const { text } = req.body;
     if (!text || !text.trim()) return fail(res, 'Мессеж хоосон байна');
+    if (text.trim().length > 2000) return fail(res, 'Мессеж 2000 тэмдэгтээс хэтрэхгүй байх ёстой');
 
     const newMsg = await GeneralMessage.create({
       senderId:    req.user._id,

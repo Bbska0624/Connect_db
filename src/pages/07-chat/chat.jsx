@@ -35,6 +35,8 @@ const Chat = () => {
   const msgsEndRef = useRef(null);
   const genEndRef  = useRef(null);
 
+  const myId = JSON.parse(localStorage.getItem('auth_user') || '{}')?.id ?? '';
+
   // ── Initial load ──────────────────────────────────────────────────────────
   // GET /api/chat/threads  +  GET /api/chat/people  +  default conversation
   useEffect(() => {
@@ -197,7 +199,7 @@ const Chat = () => {
                 </div>
                 <div className="th-body">
                   <div className="th-row">
-                    <div className="th-name">{person.name}, {person.age}</div>
+                    <div className="th-name">{person.name}</div>
                     <div className="ppl-mbti">{person.mbti}</div>
                   </div>
                   <div className="th-pre">{person.major} · {person.year}</div>
@@ -212,7 +214,7 @@ const Chat = () => {
                 <div className="th-av" style={{ background: person.avatarStyle }}>{person.avatar}</div>
                 <div className="th-body">
                   <div className="th-row">
-                    <div className="th-name">{person.name}, {person.age}</div>
+                    <div className="th-name">{person.name}</div>
                     <div className="ppl-mbti">{person.mbti}</div>
                   </div>
                   <div className="th-pre">{person.major} · {person.year}</div>
@@ -256,13 +258,13 @@ const Chat = () => {
               <div className="msgs">
                 <div className="date-sep">Өнөөдөр</div>
                 {messages.map(msg => (
-                  <div key={msg.id} className={`msg-row${msg.senderId === 1 ? ' me' : ''}`}>
+                  <div key={msg.id} className={`msg-row${String(msg.senderId) === myId ? ' me' : ''}`}>
                     <div className="msg-av">
-                      {msg.senderId === 1 ? '😊' : activeThread.avatar}
+                      {String(msg.senderId) === myId ? '😊' : activeThread.avatar}
                     </div>
                     <div className="msg-content">
-                      <div className={`msg-sender${msg.senderId === 1 ? ' me-n' : ''}`}>
-                        {msg.senderId === 1 ? 'Би' : activeThread.name}
+                      <div className={`msg-sender${String(msg.senderId) === myId ? ' me-n' : ''}`}>
+                        {String(msg.senderId) === myId ? 'Би' : activeThread.name}
                         <span className="msg-ts">{msg.time}</span>
                       </div>
                       <div className="bubble">{msg.text}</div>

@@ -6,7 +6,7 @@
  */
 
 import dns from 'dns';
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+if (process.env.NODE_ENV !== 'production') dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -30,7 +30,7 @@ import Connection     from '../models/Connection.js';
 
 const USERS = [
   {
-    email:       '20b1num0042@num.edu.mn',
+    email:       '20b1num0042@stud.num.edu.mn',
     name:        'Мягмарсүрэн Д.',
     otp:         '427831',
     major:       'Программ хангамж',
@@ -46,7 +46,7 @@ const USERS = [
     role:        'admin',
   },
   {
-    email:       '20b1num0001@num.edu.mn',
+    email:       '20b1num0001@stud.num.edu.mn',
     name:        'Номинчимэг',
     otp:         '112233',
     major:       'Программ хангамж',
@@ -61,7 +61,7 @@ const USERS = [
     isOnline:    true,
   },
   {
-    email:       '20b1num0002@num.edu.mn',
+    email:       '20b1num0002@stud.num.edu.mn',
     name:        'Батмөнх',
     otp:         '000001',
     major:       'Эдийн засаг',
@@ -76,7 +76,7 @@ const USERS = [
     isOnline:    true,
   },
   {
-    email:       '20b1num0003@num.edu.mn',
+    email:       '20b1num0003@stud.num.edu.mn',
     name:        'Энхтуяа',
     otp:         '000002',
     major:       'Дизайн',
@@ -91,7 +91,7 @@ const USERS = [
     isOnline:    true,
   },
   {
-    email:       '20b1num0004@num.edu.mn',
+    email:       '20b1num0004@stud.num.edu.mn',
     name:        'Алтжин',
     otp:         '000003',
     major:       'Мэдээлэл технологи',
@@ -106,7 +106,7 @@ const USERS = [
     isOnline:    true,
   },
   {
-    email:       '20b1num0005@num.edu.mn',
+    email:       '20b1num0005@stud.num.edu.mn',
     name:        'Тэмүүлэн',
     otp:         '000004',
     major:       'Бизнес',
@@ -124,7 +124,7 @@ const USERS = [
     isPremium:   true,
   },
   {
-    email:       '20b1num0006@num.edu.mn',
+    email:       '20b1num0006@stud.num.edu.mn',
     name:        'Оюунцэцэг',
     otp:         '000005',
     major:       'Математик',
@@ -139,7 +139,7 @@ const USERS = [
     isOnline:    false,
   },
   {
-    email:       '20b1num0007@num.edu.mn',
+    email:       '20b1num0007@stud.num.edu.mn',
     name:        'Ганболд',
     otp:         '000006',
     major:       'Хууль',
@@ -156,7 +156,7 @@ const USERS = [
     isPremium:   true,
   },
   {
-    email:       '20b1num0008@num.edu.mn',
+    email:       '20b1num0008@stud.num.edu.mn',
     name:        'Сарантуяа',
     otp:         '000007',
     major:       'Биологи',
@@ -233,6 +233,11 @@ const REPORTS = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 async function seed() {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('❌  Seed татгалзав: NODE_ENV=production орчинд ажиллах эрхгүй.');
+    process.exit(1);
+  }
+
   await mongoose.connect(process.env.MONGODB_URI, { family: 4 });
   console.log('✅  MongoDB холбогдлоо');
 

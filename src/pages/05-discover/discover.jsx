@@ -119,7 +119,7 @@ const Discover = () => {
                     </div>
                     <div className="sw-info">
                       <div className="sw-name">
-                        {currentStudent.name}, {currentStudent.age}
+                        {currentStudent.name}
                         <span className="sw-mbti-tag">{currentStudent.mbti}</span>
                       </div>
                       <div className="sw-meta">{currentStudent.major} · {currentStudent.year}-р курс</div>
@@ -168,7 +168,7 @@ const Discover = () => {
                   </div>
                   <div className="u-info">
                     <div className="u-namerow">
-                      <span className="u-name">{student.name}, {student.age}</span>
+                      <span className="u-name">{student.name}</span>
                       <span className="u-mbti">{student.mbti}</span>
                     </div>
                     <div className="u-meta">{student.major} · {student.year}-р курс</div>

@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   // ── Auth ──────────────────────────────────────────────────────────────
   email:       { type: String, required: true, unique: true, lowercase: true, trim: true },
   otp:         { type: String },
+  otpExpiry:   { type: Date, default: null },
 
   // ── Profile ───────────────────────────────────────────────────────────
   name:        { type: String, required: true, trim: true },

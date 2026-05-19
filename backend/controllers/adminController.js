@@ -31,13 +31,10 @@ export const getDashboard = async (_req, res) => {
 
     const kpis = {
       totalUsers,
-      totalUsersChange:      12,
-      dailyActive:           Math.round(totalUsers * 0.27),
-      dailyActiveChange:     8,
+      dailyActive:    Math.round(totalUsers * 0.27),
       totalConnections,
-      totalConnectionsChange: 24,
       premiumUsers,
-      conversionRate:        totalUsers > 0 ? +((premiumUsers / totalUsers) * 100).toFixed(1) : 0,
+      conversionRate: totalUsers > 0 ? +((premiumUsers / totalUsers) * 100).toFixed(1) : 0,
     };
 
     const metrics = { matchScore: 71, chatResponseRate: 40, premiumConversion: kpis.conversionRate, rating: 4.3 };

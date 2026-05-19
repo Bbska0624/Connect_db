@@ -127,7 +127,7 @@ const Landing = () => {
             <div className="feat-card">
               <div className="feat-ico ico-b">🔒</div>
               <div className="feat-t">МУИС verified</div>
-              <div className="feat-p">Зөвхөн @num.edu.mn цахим шуудантай оюутнууд нэвтрэх боломжтой.</div>
+              <div className="feat-p">Зөвхөн @stud.num.edu.mn цахим шуудантай оюутнууд нэвтрэх боломжтой.</div>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { requestOtp } from '../../services/authService';
 const Login = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail]     = useState('20B1NUM0042@num.edu.mn');
+  const [email, setEmail]     = useState('20B1NUM0042@stud.num.edu.mn');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 
@@ -49,12 +49,12 @@ const Login = () => {
               <input
                 className="inp"
                 type="email"
-                placeholder="20B1NUM0042@num.edu.mn"
+                placeholder="20B1NUM0042@stud.num.edu.mn"
                 value={email}
                 onChange={e => { setEmail(e.target.value); setError(null); }}
                 onKeyDown={e => e.key === 'Enter' && handleOtpRequest()}
               />
-              <div className="inp-hint">@num.edu.mn хаяг шаардлагатай</div>
+              <div className="inp-hint">@stud.num.edu.mn хаяг шаардлагатай</div>
             </div>
 
             {/* Primary action */}

@@ -3,8 +3,8 @@ import './admin.css';
 import Navbar from '../../shared/Navbar';
 import { getDashboard, getUsers, blockUser, getReports } from '../../services/adminService';
 
-const PLAN_LABELS = { premium: '👑 Premium', pro: '⚡ Pro', free: 'Free' };
-const PLAN_CLASSES = { premium: 'bg-prem', pro: 'bg-prem', free: 'bg-free' };
+const PLAN_LABELS  = { free: 'Free', pro: '⚡ Pro', proplus: '👑 Pro+' };
+const PLAN_CLASSES = { free: 'bg-free', pro: 'bg-prem', proplus: 'bg-prem' };
 const STATUS_LABELS = { active: 'Идэвхтэй', reported: 'Тайлагдсан', blocked: 'Блоклогдсон' };
 const STATUS_CLASSES = { active: 'bg-ok', reported: 'bg-bad', blocked: 'bg-bad' };
 
@@ -73,7 +73,7 @@ const Admin = () => {
             <div className="adm-title">Dashboard</div>
             <div className="adm-sub">NumConnect системийн тойм</div>
           </div>
-          <div className="adm-date">📅 2025-06-01 · Лхагва</div>
+          <div className="adm-date">📅 {new Date().toLocaleDateString('mn-MN', { year: 'numeric', month: '2-digit', day: '2-digit' })} · {new Date().toLocaleDateString('mn-MN', { weekday: 'short' })}</div>
         </div>
 
         {/* KPI cards — from GET /api/admin/dashboard */}
@@ -82,25 +82,22 @@ const Admin = () => {
             <div className="kpi-ico ki-a">👥</div>
             <div className="kpi-l">Нийт хэрэглэгч</div>
             <div className="kpi-n kn-a">{kpis?.totalUsers?.toLocaleString()}</div>
-            <div className="kpi-ch">↑ +{kpis?.totalUsersChange}% энэ долоо хоног</div>
           </div>
           <div className="kpi">
             <div className="kpi-ico ki-b">💬</div>
             <div className="kpi-l">Өдрийн идэвхтэй</div>
             <div className="kpi-n kn-b">{kpis?.dailyActive}</div>
-            <div className="kpi-ch">↑ +{kpis?.dailyActiveChange}% өчигдөртэй харьцуулахад</div>
           </div>
           <div className="kpi">
             <div className="kpi-ico ki-w">🤝</div>
             <div className="kpi-l">Нийт холболт</div>
             <div className="kpi-n kn-w">{kpis?.totalConnections?.toLocaleString()}</div>
-            <div className="kpi-ch">↑ +{kpis?.totalConnectionsChange}% энэ сар</div>
           </div>
           <div className="kpi">
             <div className="kpi-ico ki-g">👑</div>
             <div className="kpi-l">Premium хэрэглэгч</div>
             <div className="kpi-n kn-g">{kpis?.premiumUsers}</div>
-            <div className="kpi-ch">↑ +{kpis?.conversionRate}% конверс</div>
+            <div className="kpi-ch">{kpis?.conversionRate}% конверс</div>
           </div>
         </div>
 
@@ -151,9 +148,10 @@ const Admin = () => {
                     value={filter}
                     onChange={e => setFilter(e.target.value)}
                   >
-                    <option>Бүгд</option>
-                    <option>Premium</option>
-                    <option>Free</option>
+                    <option value="Бүгд">Бүгд</option>
+                    <option value="proplus">Pro+</option>
+                    <option value="pro">Pro</option>
+                    <option value="free">Free</option>
                   </select>
                 </div>
               </div>

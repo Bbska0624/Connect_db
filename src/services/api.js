@@ -9,11 +9,15 @@ const getHeaders = () => {
 };
 
 const request = async (path, options = {}) => {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: { ...getHeaders(), ...options.headers },
-  });
-  return res.json();
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers: { ...getHeaders(), ...options.headers },
+    });
+    return res.json();
+  } catch {
+    return { success: false, message: 'Сүлжээний алдаа гарлаа. Сервер ажиллаж байгаа эсэхийг шалгана уу.', data: null };
+  }
 };
 
 export const get  = (path)        => request(path, { method: 'GET' });

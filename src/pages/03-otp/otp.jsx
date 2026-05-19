@@ -55,7 +55,7 @@ const Otp = () => {
     }
     setError(null);
     setLoading(true);
-    const email = sessionStorage.getItem('otp_email') ?? '20B1NUM0042@num.edu.mn';
+    const email = sessionStorage.getItem('otp_email') ?? '20B1NUM0042@stud.num.edu.mn';
     const res = await verifyOtp(email, code);
     setLoading(false);
     if (res.success) {
@@ -72,7 +72,7 @@ const Otp = () => {
     inputRefs.current[0]?.focus();
   };
 
-  const email = sessionStorage.getItem('otp_email') ?? '20B1NUM0042@num.edu.mn';
+  const email = sessionStorage.getItem('otp_email') ?? '20B1NUM0042@stud.num.edu.mn';
 
   return (
     <>
