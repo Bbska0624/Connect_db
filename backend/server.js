@@ -20,14 +20,9 @@ dotenv.config();
 
 const app = express();
 
-// Trust reverse proxy (required for Render, Railway, etc.)
 app.set('trust proxy', 1);
-
-// ── Security headers ──────────────────────────────────────────────────────────
 app.use(helmet());
 
-// ── CORS ─────────────────────────────────────────────────────────────────────
-// Always allow localhost for development; add FRONTEND_URL for production
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
 if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
 
@@ -39,6 +34,26 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Lazy DB connection — works for both serverless (Vercel) and persistent (local/Render)
+let dbConnected = false;
+app.use(async (_req, res, next) => {
+  if (!dbConnected) {
+    try {
+      await mongoose.connect(process.env.MONGODB_URI, {
+        family: 4,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        connectTimeoutMS: 10000,
+      });
+      dbConnected = true;
+      console.log('✅  MongoDB холбогдлоо');
+    } catch (err) {
+      return res.status(500).json({ success: false, message: 'DB холболт амжилтгүй боллоо', data: null });
+    }
+  }
+  next();
+});
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth',     authRoutes);
@@ -64,20 +79,10 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-// ── Connect to MongoDB, then start ───────────────────────────────────────────
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    family:                    4,
-    serverSelectionTimeoutMS:  5000,
-    socketTimeoutMS:           45000,
-    connectTimeoutMS:          10000,
-  })
-  .then(() => {
-    console.log('✅  MongoDB холбогдлоо');
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`🚀  Server started on http://localhost:${PORT}`));
-  })
-  .catch(err => {
-    console.error('❌  MongoDB холбогдоход алдаа:', err.message);
-    process.exit(1);
-  });
+// ── Local development only ────────────────────────────────────────────────────
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`🚀  Server started on http://localhost:${PORT}`));
+}
+
+export default app;
