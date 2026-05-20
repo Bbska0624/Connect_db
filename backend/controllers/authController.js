@@ -38,10 +38,8 @@ export const requestOtp = async (req, res) => {
       otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    // Always log OTP in development so fake/test emails can still be used
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[OTP] ${user.email} → ${code}`);
-    }
+    // Always log OTP (visible in Render logs for demo/testing)
+    console.log(`[OTP] ${user.email} → ${code}`);
 
     // Send OTP via Gmail; log warning if it fails
     try {
