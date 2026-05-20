@@ -41,12 +41,10 @@ export const requestOtp = async (req, res) => {
     // Always log OTP (visible in Render logs for demo/testing)
     console.log(`[OTP] ${user.email} → ${code}`);
 
-    // Send OTP via Gmail; log warning if it fails
-    try {
-      await sendOtpEmail(user.email, code);
-    } catch (mailErr) {
-      console.warn(`[OTP] Email илгээхэд алдаа гарлаа: ${mailErr.message}`);
-    }
+    // Send email in background — do not block the response
+    sendOtpEmail(user.email, code).catch(mailErr =>
+      console.warn(`[OTP] Email илгээхэд алдаа гарлаа: ${mailErr.message}`)
+    );
 
     return ok(res, { email: user.email, expiresIn: 300, isNewUser }, `${user.email} руу OTP код илгээлээ`);
   } catch (err) {
