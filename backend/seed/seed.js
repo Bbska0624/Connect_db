@@ -30,7 +30,7 @@ import Connection     from '../models/Connection.js';
 
 const USERS = [
   {
-    email:       '20b1num0042@stud.num.edu.mn',
+    email:       'admin@stud.num.edu.mn',
     name:        'Мягмарсүрэн Д.',
     otp:         '427831',
     major:       'Программ хангамж',

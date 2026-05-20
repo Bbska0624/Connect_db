@@ -59,7 +59,8 @@ const Otp = () => {
     const res = await verifyOtp(email, code);
     setLoading(false);
     if (res.success) {
-      navigate('/discover');
+      const isNewUser = sessionStorage.getItem('is_new_user') === 'true';
+      navigate(isNewUser ? '/setup' : '/discover');
     } else {
       setError(res.message);
     }

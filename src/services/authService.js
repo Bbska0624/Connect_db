@@ -5,6 +5,7 @@ export const requestOtp = async (email) => {
   const res = await post('/api/auth/request-otp', { email });
   if (res.success) {
     sessionStorage.setItem('otp_email', email);
+    sessionStorage.setItem('is_new_user', res.data.isNewUser ? 'true' : 'false');
   }
   return res;
 };

@@ -21,6 +21,7 @@ export const requestOtp = async (req, res) => {
     }
 
     let user = await User.findOne({ email: email.toLowerCase() });
+    const isNewUser = !user;
     if (!user) {
       // Auto-register on first login — profile can be completed on the setup page
       user = await User.create({
@@ -37,15 +38,19 @@ export const requestOtp = async (req, res) => {
       otpExpiry: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    // Send OTP via Gmail; fall back to console log if email is not configured or fails
+    // Always log OTP in development so fake/test emails can still be used
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[OTP] ${user.email} → ${code}`);
+    }
+
+    // Send OTP via Gmail; log warning if it fails
     try {
       await sendOtpEmail(user.email, code);
     } catch (mailErr) {
       console.warn(`[OTP] Email илгээхэд алдаа гарлаа: ${mailErr.message}`);
-      console.log(`[OTP] ${user.email} → ${code}`);
     }
 
-    return ok(res, { email: user.email, expiresIn: 300 }, `${user.email} руу OTP код илгээлээ`);
+    return ok(res, { email: user.email, expiresIn: 300, isNewUser }, `${user.email} руу OTP код илгээлээ`);
   } catch (err) {
     return fail(res, err.message, 500);
   }
@@ -75,7 +80,7 @@ export const verifyOtp = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     return ok(res,
-      { token, user: { id: user._id, email: user.email, name: user.name } },
+      { token, user: { id: user._id, email: user.email, name: user.name, role: user.role } },
       'Амжилттай нэвтэрлээ'
     );
   } catch (err) {

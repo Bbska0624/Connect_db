@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Хуудсуудаа импортлох (таны жижиг үсгээр нэрлэсэн бүтцээр)
 import Landing from './pages/01-landing/landing';
@@ -10,6 +10,18 @@ import Schedule from './pages/06-schedule/schedule';
 import Chat from './pages/07-chat/chat';
 import Premium from './pages/08-premium/premium';
 import Admin from './pages/09-admin/admin';
+
+const RequireAdmin = ({ children }) => {
+  const raw = localStorage.getItem('auth_user');
+  if (!localStorage.getItem('auth_token') || !raw) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(raw);
+    if (user.role !== 'admin') return <Navigate to="/discover" replace />;
+  } catch {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   return (
@@ -24,7 +36,7 @@ function App() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/premium" element={<Premium />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
       </Routes>
     </Router>
   );
