@@ -33,7 +33,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Lazy DB connection — works for both serverless (Vercel) and persistent (local/Render)
 let dbConnected = false;
