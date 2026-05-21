@@ -17,15 +17,7 @@ const Navbar = () => {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
-  if (!admin) {
-    return (
-      <div className="nav-bar" style={{ justifyContent: 'flex-end' }}>
-        <button className="theme-toggle" onClick={() => setIsDark(!isDark)}>
-          {isDark ? '☀️' : '🌙'}
-        </button>
-      </div>
-    );
-  }
+  if (!admin) return null;
 
   return (
     <div className="nav-bar">
