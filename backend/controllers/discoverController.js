@@ -8,35 +8,70 @@ const ok   = (res, data, message = 'Request successful') =>
 const fail = (res, message, status = 400) =>
   res.status(status).json({ success: false, message, data: null });
 
-// Weighted match score (0-100) from schedule, interests, goals, and MBTI overlap.
-const WEIGHTS = { schedule: 0.40, interests: 0.25, goals: 0.20, mbti: 0.15 };
+// Symmetric Jaccard-based match score with MBTI compatibility chart and major/year bonuses.
+const WEIGHTS = { schedule: 35, interests: 25, goals: 20, mbti: 20 };
 
-const overlapPct = (mine, peer, keyFn = x => String(x).toLowerCase()) => {
-  if (!mine.length || !peer.length) return null;
-  const peerSet = new Set(peer.map(keyFn));
-  const common = mine.filter(x => peerSet.has(keyFn(x))).length;
-  return (common / mine.length) * 100;
+// Jaccard similarity: |A∩B| / |A∪B| · 100
+const jaccard = (a, b, keyFn = x => String(x).toLowerCase()) => {
+  if (!a.length || !b.length) return null;
+  const setA = new Set(a.map(keyFn));
+  const setB = new Set(b.map(keyFn));
+  let inter = 0;
+  for (const k of setA) if (setB.has(k)) inter++;
+  const union = setA.size + setB.size - inter;
+  return union === 0 ? null : (inter / union) * 100;
 };
 
-const mbtiPct = (a, b) => {
+// Known compatible MBTI pairs (Keirsey/16Personalities consensus). Returns 100 if listed.
+const MBTI_PAIRS = {
+  INFJ: ['ENFP', 'ENTP'], INFP: ['ENFJ', 'ENTJ'],
+  ENFJ: ['INFP', 'ISFP'], ENFP: ['INFJ', 'INTJ'],
+  INTJ: ['ENFP', 'ENTP'], INTP: ['ENTJ', 'ESTJ'],
+  ENTJ: ['INTP', 'INFP'], ENTP: ['INFJ', 'INTJ'],
+  ISFJ: ['ESFP', 'ESTP'], ISFP: ['ENFJ', 'ESFJ'],
+  ESFJ: ['ISFP', 'ISTP'], ESFP: ['ISFJ', 'ISTJ'],
+  ISTJ: ['ESFP', 'ESTP'], ISTP: ['ESFJ', 'ESTJ'],
+  ESTJ: ['ISTP', 'INTP'], ESTP: ['ISFJ', 'ISTJ'],
+};
+
+const mbtiScore = (a, b) => {
   if (!a || !b || a.length !== 4 || b.length !== 4) return null;
+  const A = a.toUpperCase(), B = b.toUpperCase();
+  if (A === B) return 100;
+  if (MBTI_PAIRS[A]?.includes(B) || MBTI_PAIRS[B]?.includes(A)) return 100;
   let same = 0;
-  for (let i = 0; i < 4; i++) if (a[i].toUpperCase() === b[i].toUpperCase()) same++;
-  return (same / 4) * 100;
+  for (let i = 0; i < 4; i++) if (A[i] === B[i]) same++;
+  return (same / 4) * 75; // max 75 for non-listed pairs, scaled by letter match
 };
 
-const calcMatch = ({ myFree, peerFree, myInterests, peerInterests, myGoals, peerGoals, myMbti, peerMbti }) => {
+const calcMatch = ({
+  myFree, peerFree,
+  myInterests, peerInterests,
+  myGoals, peerGoals,
+  myMbti, peerMbti,
+  myMajor, peerMajor,
+  myYear, peerYear,
+}) => {
   const parts = [
-    { w: WEIGHTS.schedule,  v: overlapPct(myFree, peerFree, c => `${c.day}-${c.hour}`) },
-    { w: WEIGHTS.interests, v: overlapPct(myInterests, peerInterests) },
-    { w: WEIGHTS.goals,     v: overlapPct(myGoals, peerGoals) },
-    { w: WEIGHTS.mbti,      v: mbtiPct(myMbti, peerMbti) },
+    { w: WEIGHTS.schedule,  v: jaccard(myFree, peerFree, c => `${c.day}-${c.hour}`) },
+    { w: WEIGHTS.interests, v: jaccard(myInterests, peerInterests) },
+    { w: WEIGHTS.goals,     v: jaccard(myGoals, peerGoals) },
+    { w: WEIGHTS.mbti,      v: mbtiScore(myMbti, peerMbti) },
   ].filter(p => p.v !== null);
 
   if (!parts.length) return 0;
-  const weightedSum = parts.reduce((acc, p) => acc + p.v * p.w, 0);
-  const totalWeight = parts.reduce((acc, p) => acc + p.w, 0);
-  return Math.round(weightedSum / totalWeight);
+  const base = parts.reduce((s, p) => s + p.w * p.v, 0) / parts.reduce((s, p) => s + p.w, 0);
+
+  // Bonuses (capped, only added once base is computed)
+  let bonus = 0;
+  if (myMajor && peerMajor && myMajor.trim().toLowerCase() === peerMajor.trim().toLowerCase()) bonus += 5;
+  if (myYear && peerYear) {
+    const diff = Math.abs(myYear - peerYear);
+    if (diff === 0) bonus += 4;
+    else if (diff === 1) bonus += 2;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(base + bonus)));
 };
 
 // GET /api/discover/students
@@ -46,7 +81,7 @@ export const getStudents = async (req, res) => {
     const acted = await Connection.find({ userId: req.user._id }).select('targetId');
     const actedIds = acted.map(c => c.targetId);
 
-    const me = await User.findById(req.user._id).select('interests goals mbti').lean();
+    const me = await User.findById(req.user._id).select('interests goals mbti major year').lean();
     const mySchedule = await Schedule.findOne({ userId: req.user._id }).lean();
     const myFree = (mySchedule?.cells || []).filter(c => c.type === 'f');
 
@@ -64,10 +99,12 @@ export const getStudents = async (req, res) => {
       const peerCells = scheduleMap.get(String(s._id)) || [];
       const peerFree = peerCells.filter(c => c.type === 'f');
       const match = calcMatch({
-        myFree,            peerFree,
+        myFree,                           peerFree,
         myInterests: me?.interests || [], peerInterests: s.interests || [],
         myGoals:     me?.goals     || [], peerGoals:     s.goals     || [],
         myMbti:      me?.mbti,            peerMbti:      s.mbti,
+        myMajor:     me?.major,           peerMajor:     s.major,
+        myYear:      me?.year,            peerYear:      s.year,
       });
       return { ...s, match };
     });
