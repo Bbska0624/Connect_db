@@ -13,6 +13,8 @@ import {
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
+const DEFAULT_AVATAR_BG = 'linear-gradient(135deg,var(--accent-lt),var(--accent))';
+
 const AvatarImg = ({ avatarUrl, avatar, avatarStyle, size = 40 }) => {
   if (avatarUrl) {
     return (
@@ -27,7 +29,8 @@ const AvatarImg = ({ avatarUrl, avatar, avatarStyle, size = 40 }) => {
     <div
       style={{
         width: size, height: size, borderRadius: '50%',
-        background: avatarStyle, display: 'flex', alignItems: 'center',
+        background: avatarStyle || DEFAULT_AVATAR_BG,
+        display: 'flex', alignItems: 'center',
         justifyContent: 'center', fontSize: size * 0.45, flexShrink: 0,
       }}
     >
@@ -387,7 +390,7 @@ const Chat = () => {
                         <AvatarImg
                           avatarUrl={isMe ? (myUser.avatarUrl || '') : (activeThread.avatarUrl || '')}
                           avatar={isMe ? (myUser.avatar || '😊') : activeThread.avatar}
-                          avatarStyle={isMe ? '' : activeThread.avatarStyle}
+                          avatarStyle={isMe ? (myUser.avatarStyle || '') : activeThread.avatarStyle}
                           size={36}
                         />
                       </div>
