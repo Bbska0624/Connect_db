@@ -8,19 +8,35 @@ const ok   = (res, data, message = 'Request successful') =>
 const fail = (res, message, status = 400) =>
   res.status(status).json({ success: false, message, data: null });
 
-// Free-cell overlap score (0-100). Falls back to interest similarity when no schedule.
-const calcMatch = (myFreeCells, peerFreeCells, myInterests = [], peerInterests = []) => {
-  if (myFreeCells.length && peerFreeCells.length) {
-    const peerKeys = new Set(peerFreeCells.map(c => `${c.day}-${c.hour}`));
-    const common = myFreeCells.filter(c => peerKeys.has(`${c.day}-${c.hour}`));
-    return Math.round((common.length / myFreeCells.length) * 100);
-  }
-  if (myInterests.length && peerInterests.length) {
-    const peerSet = new Set(peerInterests.map(i => i.toLowerCase()));
-    const overlap = myInterests.filter(i => peerSet.has(i.toLowerCase())).length;
-    return Math.round((overlap / myInterests.length) * 100);
-  }
-  return 0;
+// Weighted match score (0-100) from schedule, interests, goals, and MBTI overlap.
+const WEIGHTS = { schedule: 0.40, interests: 0.25, goals: 0.20, mbti: 0.15 };
+
+const overlapPct = (mine, peer, keyFn = x => String(x).toLowerCase()) => {
+  if (!mine.length || !peer.length) return null;
+  const peerSet = new Set(peer.map(keyFn));
+  const common = mine.filter(x => peerSet.has(keyFn(x))).length;
+  return (common / mine.length) * 100;
+};
+
+const mbtiPct = (a, b) => {
+  if (!a || !b || a.length !== 4 || b.length !== 4) return null;
+  let same = 0;
+  for (let i = 0; i < 4; i++) if (a[i].toUpperCase() === b[i].toUpperCase()) same++;
+  return (same / 4) * 100;
+};
+
+const calcMatch = ({ myFree, peerFree, myInterests, peerInterests, myGoals, peerGoals, myMbti, peerMbti }) => {
+  const parts = [
+    { w: WEIGHTS.schedule,  v: overlapPct(myFree, peerFree, c => `${c.day}-${c.hour}`) },
+    { w: WEIGHTS.interests, v: overlapPct(myInterests, peerInterests) },
+    { w: WEIGHTS.goals,     v: overlapPct(myGoals, peerGoals) },
+    { w: WEIGHTS.mbti,      v: mbtiPct(myMbti, peerMbti) },
+  ].filter(p => p.v !== null);
+
+  if (!parts.length) return 0;
+  const weightedSum = parts.reduce((acc, p) => acc + p.v * p.w, 0);
+  const totalWeight = parts.reduce((acc, p) => acc + p.w, 0);
+  return Math.round(weightedSum / totalWeight);
 };
 
 // GET /api/discover/students
@@ -30,9 +46,9 @@ export const getStudents = async (req, res) => {
     const acted = await Connection.find({ userId: req.user._id }).select('targetId');
     const actedIds = acted.map(c => c.targetId);
 
-    const me = await User.findById(req.user._id).select('interests').lean();
+    const me = await User.findById(req.user._id).select('interests goals mbti').lean();
     const mySchedule = await Schedule.findOne({ userId: req.user._id }).lean();
-    const myFreeCells = (mySchedule?.cells || []).filter(c => c.type === 'f');
+    const myFree = (mySchedule?.cells || []).filter(c => c.type === 'f');
 
     const students = await User.find({
       _id:    { $nin: [req.user._id, ...actedIds] },
@@ -46,8 +62,13 @@ export const getStudents = async (req, res) => {
 
     const withMatch = students.map(s => {
       const peerCells = scheduleMap.get(String(s._id)) || [];
-      const peerFreeCells = peerCells.filter(c => c.type === 'f');
-      const match = calcMatch(myFreeCells, peerFreeCells, me?.interests || [], s.interests || []);
+      const peerFree = peerCells.filter(c => c.type === 'f');
+      const match = calcMatch({
+        myFree,            peerFree,
+        myInterests: me?.interests || [], peerInterests: s.interests || [],
+        myGoals:     me?.goals     || [], peerGoals:     s.goals     || [],
+        myMbti:      me?.mbti,            peerMbti:      s.mbti,
+      });
       return { ...s, match };
     });
 
