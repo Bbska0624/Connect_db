@@ -41,6 +41,8 @@ html[data-theme="dark"] .step-bar{background:rgba(26,25,24,.94)}
 .ph-main-plus{font-size:32px;color:var(--accent);margin-bottom:6px}
 .ph-main-lbl{font-size:13px;font-weight:700;color:var(--accent)}
 .ph-main-badge{position:absolute;bottom:12px;left:12px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;padding:3px 10px;border-radius:var(--r-full);letter-spacing:.8px;text-transform:uppercase}
+.ph-main:hover .ph-overlay{background:rgba(0,0,0,.35)!important}
+.ph-main:hover .ph-change-lbl{opacity:1!important}
 .ph-sec{background:var(--bg);border:1.5px dashed var(--line);border-radius:var(--r);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
 .ph-sec:hover{border-color:var(--accent);background:var(--accent-g)}
 .ph-sec-ico{font-size:20px;color:var(--mute);margin-bottom:4px}

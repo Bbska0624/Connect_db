@@ -19,7 +19,7 @@ export const getProfile = async (req, res) => {
 // Body: partial user fields
 export const updateProfile = async (req, res) => {
   try {
-    const allowed = ['name', 'major', 'year', 'bio', 'mbti', 'interests', 'goals', 'instagram', 'facebook', 'avatar'];
+    const allowed = ['name', 'major', 'year', 'bio', 'mbti', 'interests', 'goals', 'instagram', 'facebook', 'avatar', 'avatarUrl'];
     const updates = {};
     allowed.forEach(field => { if (req.body[field] !== undefined) updates[field] = req.body[field]; });
 

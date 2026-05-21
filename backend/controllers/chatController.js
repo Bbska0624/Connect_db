@@ -48,10 +48,13 @@ export const getThreads = async (req, res) => {
       { $unwind: '$user' },
       {
         $project: {
+          _id:         0,
+          id:          { $toString: '$_id' },
           userId:      '$_id',
           name:        '$user.name',
           avatar:      '$user.avatar',
           avatarStyle: '$user.avatarStyle',
+          avatarUrl:   '$user.avatarUrl',
           isOnline:    '$user.isOnline',
           lastMessage: 1,
           lastTime:    1,
@@ -129,6 +132,7 @@ export const getPeople = async (req, res) => {
       name:        p.name,
       avatar:      p.avatar,
       avatarStyle: p.avatarStyle,
+      avatarUrl:   p.avatarUrl,
       mbti:        p.mbti,
       major:       p.major,
       year:        `${p.year}-р курс`,

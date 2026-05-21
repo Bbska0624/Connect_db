@@ -9,8 +9,7 @@ const OTP_LENGTH = 6;
 const Otp = () => {
   const navigate = useNavigate();
 
-  // Pre-fill first 3 digits matching the demo OTP (427831)
-  const [digits, setDigits]   = useState(['4', '2', '7', '', '', '']);
+  const [digits, setDigits]   = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
@@ -55,7 +54,7 @@ const Otp = () => {
     }
     setError(null);
     setLoading(true);
-    const email = sessionStorage.getItem('otp_email') ?? '20B1NUM0042@stud.num.edu.mn';
+    const email = sessionStorage.getItem('otp_email') ?? '';
     const res = await verifyOtp(email, code);
     setLoading(false);
     if (res.success) {

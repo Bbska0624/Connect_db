@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import './chat.css';
 import Navbar from '../../shared/Navbar';
 import {
@@ -10,7 +11,51 @@ import {
   sendGeneralMessage,
 } from '../../services/chatService';
 
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+const AvatarImg = ({ avatarUrl, avatar, avatarStyle, size = 40 }) => {
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt=""
+        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+      />
+    );
+  }
+  return (
+    <div
+      style={{
+        width: size, height: size, borderRadius: '50%',
+        background: avatarStyle, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: size * 0.45, flexShrink: 0,
+      }}
+    >
+      {avatar}
+    </div>
+  );
+};
+
+// Build a virtual thread from a person/user object (before any messages exist)
+const makeVirtualThread = (user) => ({
+  id:          String(user.id ?? user._id),
+  userId:      String(user.id ?? user._id),
+  name:        user.name,
+  avatar:      user.avatar,
+  avatarUrl:   user.avatarUrl || '',
+  avatarStyle: user.avatarStyle || '',
+  isOnline:    user.isOnline ?? false,
+  lastMessage: '',
+  lastTime:    '',
+  unread:      0,
+  _virtual:    true,
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Chat = () => {
+  const location = useLocation();
+
   const [activeTab,       setActiveTab]       = useState('dms');
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
   const [isGeneralOpen,   setIsGeneralOpen]   = useState(false);
@@ -21,7 +66,7 @@ const Chat = () => {
   const [people,   setPeople]   = useState([]);
 
   // Active DM conversation
-  const [activeThread,  setActiveThread]  = useState(null); // thread object
+  const [activeThread,  setActiveThread]  = useState(null);
   const [messages,      setMessages]      = useState([]);
   const [msgInput,      setMsgInput]      = useState('');
   const [sendingMsg,    setSendingMsg]    = useState(false);
@@ -32,41 +77,90 @@ const Chat = () => {
 
   const [loadingThreads, setLoadingThreads] = useState(true);
 
-  const msgsEndRef = useRef(null);
-  const genEndRef  = useRef(null);
+  const msgsEndRef       = useRef(null);
+  const genEndRef        = useRef(null);
+  const openUserHandled  = useRef(false);   // prevent repeated handling of route state
 
-  const myId = JSON.parse(localStorage.getItem('auth_user') || '{}')?.id ?? '';
+  const myId = (() => {
+    try { return JSON.parse(localStorage.getItem('auth_user') || '{}')?.id ?? ''; } catch { return ''; }
+  })();
+
+  const myUser = (() => {
+    try { return JSON.parse(localStorage.getItem('auth_user') || '{}'); } catch { return {}; }
+  })();
 
   // ── Initial load ──────────────────────────────────────────────────────────
-  // GET /api/chat/threads  +  GET /api/chat/people  +  default conversation
   useEffect(() => {
     Promise.all([getThreads(), getPeople()]).then(([tRes, pRes]) => {
-      if (tRes.success) {
-        setThreads(tRes.data);
-        // Open the first thread by default
-        if (tRes.data.length > 0) openThread(tRes.data[0]);
-      }
+      if (tRes.success) setThreads(tRes.data);
       if (pRes.success) setPeople(pRes.data);
       setLoadingThreads(false);
     });
   }, []);
 
-  // Scroll to bottom when messages change
-  useEffect(() => { msgsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
-  useEffect(() => { genEndRef.current?.scrollIntoView({ behavior: 'smooth' });  }, [genMessages]);
+  // ── Handle navigate-from-Discover / navigate-from-People ─────────────────
+  // Runs once after threads finish loading
+  useEffect(() => {
+    if (loadingThreads || openUserHandled.current) return;
+    const openUser = location.state?.openUser;
+    if (!openUser) return;
+    openUserHandled.current = true;
 
-  // ── Thread selection ──────────────────────────────────────────────────────
-  // GET /api/chat/messages/:userId
+    const existing = threads.find(t => String(t.userId) === String(openUser.id));
+    if (existing) {
+      openThread(existing);
+    } else {
+      setActiveThread(makeVirtualThread(openUser));
+      setMessages([]);
+    }
+    setActiveTab('dms');
+  }, [loadingThreads, threads]);
+
+  // ── Poll: refresh messages every 4 s when a thread is open ───────────────
+  useEffect(() => {
+    if (!activeThread) return;
+    const id = setInterval(async () => {
+      const res = await getMessages(activeThread.userId);
+      if (res.success) setMessages(res.data);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [activeThread?.userId]);
+
+  // ── Poll: refresh thread list every 8 s ──────────────────────────────────
+  useEffect(() => {
+    const id = setInterval(async () => {
+      const res = await getThreads();
+      if (res.success) setThreads(res.data);
+    }, 8000);
+    return () => clearInterval(id);
+  }, []);
+
+  // ── Scroll to bottom on new messages ─────────────────────────────────────
+  useEffect(() => { msgsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => { genEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [genMessages]);
+
+  // ── Open a thread ─────────────────────────────────────────────────────────
   const openThread = async (thread) => {
     setActiveThread(thread);
     const res = await getMessages(thread.userId);
     if (res.success) setMessages(res.data);
-    // Clear unread badge
     setThreads(prev => prev.map(t => t.id === thread.id ? { ...t, unread: 0 } : t));
   };
 
+  // ── Start or switch to a conversation with a person (from People tab) ────
+  const startConversation = (person) => {
+    const existing = threads.find(t => String(t.userId) === String(person.id));
+    if (existing) {
+      openThread(existing);
+    } else {
+      setActiveThread(makeVirtualThread(person));
+      setMessages([]);
+    }
+    setActiveTab('dms');
+    setIsUserPanelOpen(false);
+  };
+
   // ── Send DM ───────────────────────────────────────────────────────────────
-  // POST /api/chat/messages/:userId
   const handleSendMessage = async () => {
     const text = msgInput.trim();
     if (!text || sendingMsg || !activeThread) return;
@@ -75,23 +169,28 @@ const Chat = () => {
     if (res.success) {
       setMessages(prev => [...prev, res.data]);
       setMsgInput('');
-      // Update thread preview
-      setThreads(prev => prev.map(t =>
-        t.id === activeThread.id ? { ...t, lastMessage: text, lastTime: res.data.time } : t
-      ));
+      // Refresh thread list so this conversation appears / updates
+      getThreads().then(r => {
+        if (r.success) {
+          setThreads(r.data);
+          // If this was a virtual thread, replace it with the real one from the API
+          if (activeThread._virtual) {
+            const real = r.data.find(t => String(t.userId) === String(activeThread.userId));
+            if (real) setActiveThread(real);
+          }
+        }
+      });
     }
     setSendingMsg(false);
   };
 
   // ── General channel ───────────────────────────────────────────────────────
-  // GET /api/chat/general  (lazy — only when modal opens)
   useEffect(() => {
     if (isGeneralOpen && genMessages.length === 0) {
       getGeneralMessages().then(res => { if (res.success) setGenMessages(res.data); });
     }
   }, [isGeneralOpen]);
 
-  // POST /api/chat/general
   const handleSendGeneral = async () => {
     const text = genInput.trim();
     if (!text) return;
@@ -113,7 +212,6 @@ const Chat = () => {
     <>
       <Navbar />
 
-      {/* ── CHAT SHELL ── */}
       <div className="chat-shell">
 
         {/* ── Left: thread list ── */}
@@ -132,7 +230,7 @@ const Chat = () => {
               💬 Мессеж
             </button>
             <button className={`chat-tab${activeTab === 'people' ? ' on' : ''}`} onClick={() => setActiveTab('people')}>
-              👥 Бүгд <span className="ct-badge">1,247</span>
+              👥 Бүгд <span className="ct-badge">{people.length}</span>
             </button>
           </div>
 
@@ -146,15 +244,27 @@ const Chat = () => {
               <div className="th-body">
                 <div className="th-row">
                   <div className="th-name"># general</div>
-                  <div className="th-time">14:31</div>
                 </div>
-                <div className="th-pre new">Номинчимэг: React мэддэг үү?</div>
+                <div className="th-pre">Нийтийн чат</div>
               </div>
-              <div className="th-unread">12</div>
             </div>
 
             {/* DM threads from API */}
-            <div className="tc-cat" style={{ marginTop: '6px' }}>▾ ИДЭВХТЭЙ</div>
+            <div className="tc-cat" style={{ marginTop: '6px' }}>▾ ХАРИЛЦАА</div>
+
+            {/* Virtual (new) thread shown at top if no real thread yet */}
+            {activeThread?._virtual && (
+              <div className="th-item on">
+                <AvatarImg avatarUrl={activeThread.avatarUrl} avatar={activeThread.avatar} avatarStyle={activeThread.avatarStyle} size={40} />
+                <div className="th-body">
+                  <div className="th-row">
+                    <div className="th-name">{activeThread.name}</div>
+                  </div>
+                  <div className="th-pre" style={{ color: 'var(--dim)' }}>Шинэ харилцаа</div>
+                </div>
+              </div>
+            )}
+
             {loadingThreads
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="th-item" style={{ gap: 10 }}>
@@ -171,8 +281,8 @@ const Chat = () => {
                     className={`th-item${activeThread?.id === thread.id ? ' on' : ''}`}
                     onClick={() => openThread(thread)}
                   >
-                    <div className="th-av" style={{ background: thread.avatarStyle }}>
-                      {thread.avatar}
+                    <div style={{ position: 'relative' }}>
+                      <AvatarImg avatarUrl={thread.avatarUrl} avatar={thread.avatar} avatarStyle={thread.avatarStyle} size={40} />
                       {thread.isOnline && <div className="th-on"></div>}
                     </div>
                     <div className="th-body">
@@ -186,15 +296,21 @@ const Chat = () => {
                   </div>
                 ))
             }
+
+            {!loadingThreads && threads.length === 0 && !activeThread?._virtual && (
+              <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--sub)', fontSize: 13 }}>
+                Харилцаа байхгүй байна.<br />Discover-оос оюутантай холбогдоорой.
+              </div>
+            )}
           </div>
 
           {/* ── People tab ── */}
           <div className="thread-list" style={{ display: activeTab === 'people' ? 'flex' : 'none', flexDirection: 'column' }}>
             <div className="tc-cat">▾ ОНЛАЙН</div>
             {people.filter(p => p.isOnline).map(person => (
-              <div key={person.id} className="th-item" onClick={() => openUserPanel(person)}>
-                <div className="th-av" style={{ background: person.avatarStyle }}>
-                  {person.avatar}
+              <div key={String(person.id)} className="th-item" onClick={() => openUserPanel(person)}>
+                <div style={{ position: 'relative' }}>
+                  <AvatarImg avatarUrl={person.avatarUrl} avatar={person.avatar} avatarStyle={person.avatarStyle} size={40} />
                   <div className="th-on"></div>
                 </div>
                 <div className="th-body">
@@ -210,8 +326,10 @@ const Chat = () => {
 
             <div className="tc-cat" style={{ marginTop: '8px' }}>▾ ОФЛАЙН</div>
             {people.filter(p => !p.isOnline).map(person => (
-              <div key={person.id} className="th-item" onClick={() => openUserPanel(person)}>
-                <div className="th-av" style={{ background: person.avatarStyle }}>{person.avatar}</div>
+              <div key={String(person.id)} className="th-item" onClick={() => openUserPanel(person)}>
+                <div style={{ position: 'relative' }}>
+                  <AvatarImg avatarUrl={person.avatarUrl} avatar={person.avatar} avatarStyle={person.avatarStyle} size={40} />
+                </div>
                 <div className="th-body">
                   <div className="th-row">
                     <div className="th-name">{person.name}</div>
@@ -222,6 +340,12 @@ const Chat = () => {
                 <div className="ppl-score" style={{ color: 'var(--dim)' }}>{person.score}</div>
               </div>
             ))}
+
+            {people.length === 0 && (
+              <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--sub)', fontSize: 13 }}>
+                Одоогоор бусад оюутан байхгүй байна.
+              </div>
+            )}
           </div>
         </div>
 
@@ -231,8 +355,8 @@ const Chat = () => {
             <>
               {/* Header */}
               <div className="chat-bar">
-                <div className="cb-av" style={{ background: activeThread.avatarStyle }}>{activeThread.avatar}</div>
-                <div>
+                <AvatarImg avatarUrl={activeThread.avatarUrl} avatar={activeThread.avatar} avatarStyle={activeThread.avatarStyle} size={38} />
+                <div style={{ marginLeft: 10 }}>
                   <div className="cb-name">{activeThread.name}</div>
                   <div className="cb-status" style={{ color: activeThread.isOnline ? '#059669' : 'var(--mute)' }}>
                     {activeThread.isOnline ? '● Онлайн байна' : '○ Офлайн'}
@@ -240,37 +364,43 @@ const Chat = () => {
                 </div>
                 <div className="cb-acts">
                   <div className="cb-btn" onClick={() => {
-                    const person = people.find(p => p.id === activeThread.userId);
+                    const person = people.find(p => String(p.id) === String(activeThread.userId));
                     if (person) openUserPanel(person);
                   }}>👤</div>
-                  <div className="cb-btn">📅</div>
                   <div className="cb-btn">⋯</div>
                 </div>
-              </div>
-
-              {/* Common time banner */}
-              <div className="ct-banner">
-                <div style={{ fontSize: '16px' }}>📅</div>
-                <div className="ct-txt">Та хоёр <strong>Лхагва 14:00–16:00, Пүрэв 10:00–12:00</strong> нийтлэг цагтай.</div>
               </div>
 
               {/* Messages */}
               <div className="msgs">
                 <div className="date-sep">Өнөөдөр</div>
-                {messages.map(msg => (
-                  <div key={msg.id} className={`msg-row${String(msg.senderId) === myId ? ' me' : ''}`}>
-                    <div className="msg-av">
-                      {String(msg.senderId) === myId ? '😊' : activeThread.avatar}
-                    </div>
-                    <div className="msg-content">
-                      <div className={`msg-sender${String(msg.senderId) === myId ? ' me-n' : ''}`}>
-                        {String(msg.senderId) === myId ? 'Би' : activeThread.name}
-                        <span className="msg-ts">{msg.time}</span>
-                      </div>
-                      <div className="bubble">{msg.text}</div>
-                    </div>
+                {messages.length === 0 && (
+                  <div style={{ textAlign: 'center', color: 'var(--sub)', fontSize: 13, padding: '32px 0' }}>
+                    Анхны мессежээ илгээнэ үү 👋
                   </div>
-                ))}
+                )}
+                {messages.map(msg => {
+                  const isMe = String(msg.senderId) === myId;
+                  return (
+                    <div key={msg.id ?? msg._id} className={`msg-row${isMe ? ' me' : ''}`}>
+                      <div style={{ flexShrink: 0, marginTop: 2 }}>
+                        <AvatarImg
+                          avatarUrl={isMe ? (myUser.avatarUrl || '') : (activeThread.avatarUrl || '')}
+                          avatar={isMe ? (myUser.avatar || '😊') : activeThread.avatar}
+                          avatarStyle={isMe ? '' : activeThread.avatarStyle}
+                          size={36}
+                        />
+                      </div>
+                      <div className="msg-content">
+                        <div className={`msg-sender${isMe ? ' me-n' : ''}`}>
+                          {isMe ? 'Би' : activeThread.name}
+                          <span className="msg-ts">{msg.time}</span>
+                        </div>
+                        <div className="bubble">{msg.text}</div>
+                      </div>
+                    </div>
+                  );
+                })}
                 <div ref={msgsEndRef} />
               </div>
 
@@ -283,12 +413,14 @@ const Chat = () => {
                     placeholder={`${activeThread.name} руу мессеж...`}
                     value={msgInput}
                     onChange={e => setMsgInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                   />
                   <button className="chat-ico">😊</button>
                 </div>
                 <button className="chat-send" onClick={handleSendMessage} disabled={sendingMsg}>
-                  {sendingMsg ? <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span> : '➤'}
+                  {sendingMsg
+                    ? <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }}></span>
+                    : '➤'}
                 </button>
               </div>
             </>
@@ -307,7 +439,10 @@ const Chat = () => {
             <>
               <div className="up-head">
                 <div className="up-ava" style={{ background: panelData.avatarStyle }}>
-                  {panelData.avatar}
+                  {panelData.avatarUrl
+                    ? <img src={panelData.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    : panelData.avatar
+                  }
                   <div className={`up-dot ${panelData.isOnline ? 'on' : 'off'}`}></div>
                 </div>
                 <div className="up-name">{panelData.name}</div>
@@ -329,13 +464,7 @@ const Chat = () => {
               </div>
               <div className="up-sec" style={{ marginTop: '16px' }}>ТАНИЛЦУУЛГА</div>
               <div className="up-bio">{panelData.bio}</div>
-              <div className="up-sec" style={{ marginTop: '16px' }}>НИЙТЛЭГ ЦАГ</div>
-              <div className="up-sched">📅 Лхагва 14:00–16:00, Пүрэв 10:00–12:00</div>
-              <button className="up-chat-btn" onClick={() => {
-                const thread = threads.find(t => t.userId === panelData.id);
-                if (thread) { openThread(thread); setActiveTab('dms'); }
-                setIsUserPanelOpen(false);
-              }}>
+              <button className="up-chat-btn" onClick={() => startConversation(panelData)}>
                 💬 Мессеж илгээх
               </button>
             </>
@@ -354,7 +483,10 @@ const Chat = () => {
               <span className="gen-desc"> · нийтийн чат</span>
             </div>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div className="gen-online"><div className="gen-dot"></div><span><strong style={{ color: 'var(--ink)' }}>48</strong> онлайн</span></div>
+              <div className="gen-online">
+                <div className="gen-dot"></div>
+                <span><strong style={{ color: 'var(--ink)' }}>{people.filter(p => p.isOnline).length}</strong> онлайн</span>
+              </div>
               <button className="gen-x" onClick={() => setIsGeneralOpen(false)}>✕ Гарах</button>
             </div>
           </div>
@@ -362,8 +494,10 @@ const Chat = () => {
           {/* Messages */}
           <div className="gen-msgs">
             {genMessages.map(msg => (
-              <div key={msg.id} className="gen-msg">
-                <div className="gen-av" style={{ background: msg.avatarStyle }}>{msg.avatar}</div>
+              <div key={msg.id ?? msg._id} className="gen-msg">
+                <div style={{ flexShrink: 0, marginTop: 2 }}>
+                  <AvatarImg avatarUrl={msg.avatarUrl || ''} avatar={msg.avatar} avatarStyle={msg.avatarStyle} size={36} />
+                </div>
                 <div className="gen-body">
                   <div className="gen-head">
                     <span className="gen-name">{msg.senderName}</span>

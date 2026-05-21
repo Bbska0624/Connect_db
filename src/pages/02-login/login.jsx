@@ -7,7 +7,7 @@ import { requestOtp } from '../../services/authService';
 const Login = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail]     = useState('20B1NUM0042@stud.num.edu.mn');
+  const [email, setEmail]     = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
 

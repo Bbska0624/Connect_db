@@ -74,6 +74,16 @@
 .feat-t{font-size:16px;font-weight:700;margin-bottom:8px;color:var(--ink)}
 .feat-p{font-size:14px;color:var(--sub);line-height:1.7}
 
+/* ── How it works ── */
+.hiw-section{padding:80px 48px;max-width:1000px;margin:0 auto}
+.hiw-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.hiw-step{background:var(--card);border-radius:var(--r-md);padding:36px 28px;border:1px solid var(--line);text-align:center;position:relative;transition:.3s var(--ease)}
+.hiw-step:hover{border-color:var(--accent-gw);box-shadow:var(--sh-md);transform:translateY(-4px)}
+.hiw-num{position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.hiw-ico{font-size:36px;margin-bottom:16px}
+.hiw-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.hiw-p{font-size:14px;color:var(--sub);line-height:1.7}
+
 /* ── Responsive ── */
 @media(max-width:768px){
   .land-nav{padding:16px 20px}.land-links{display:none}
@@ -84,5 +94,7 @@
   .phone-wrap{transform:scale(.75);margin-bottom:0}
   .feat-grid{grid-template-columns:1fr}
   .feat-section{padding:40px 20px}
+  .hiw-steps{grid-template-columns:1fr}
+  .hiw-section{padding:40px 20px}
   .stats-row{flex-direction:column}.stat-item{border-right:none;border-bottom:1px solid var(--line);padding:20px}
 }

@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   facebook:    { type: String, default: '' },
   avatar:      { type: String, default: '😊' },
   avatarStyle: { type: String, default: 'linear-gradient(135deg,var(--accent-lt),var(--accent))' },
+  avatarUrl:   { type: String, default: '' },
 
   // ── Discovery ─────────────────────────────────────────────────────────
   match:       { type: Number, default: 0 },   // schedule-overlap score vs seed user

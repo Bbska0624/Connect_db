@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './discover.css';
 import Navbar from '../../shared/Navbar';
 import { getAvatarColor } from '../../utils/match-logic';
 import { getStudents, connectStudent, passStudent } from '../../services/discoverService';
 
 const Discover = () => {
-  const [viewMode,      setViewMode]      = useState('swipe');
-  const [students,      setStudents]      = useState([]);
-  const [currentIndex,  setCurrentIndex]  = useState(0);
-  const [showModal,     setShowModal]     = useState(false);
-  const [loading,       setLoading]       = useState(true);
-  const [connectedName, setConnectedName] = useState('');
+  const navigate = useNavigate();
+
+  const [viewMode,     setViewMode]     = useState('swipe');
+  const [students,     setStudents]     = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading,      setLoading]      = useState(true);
 
   // GET /api/discover/students
   useEffect(() => {
@@ -22,6 +23,16 @@ const Discover = () => {
 
   const currentStudent = students[currentIndex];
 
+  // Build the state object passed to /chat when opening a conversation
+  const buildOpenUser = (student) => ({
+    id:          String(student._id ?? student.id),
+    name:        student.name,
+    avatar:      student.avatar,
+    avatarUrl:   student.avatarUrl || '',
+    avatarStyle: student.avatarStyle ?? getAvatarColor(String(student._id ?? student.id)),
+    isOnline:    student.isOnline,
+  });
+
   // POST /api/discover/pass/:id
   const handlePass = async () => {
     if (!currentStudent) return;
@@ -29,17 +40,14 @@ const Discover = () => {
     setCurrentIndex(prev => prev + 1);
   };
 
-  // POST /api/discover/connect/:id
+  // POST /api/discover/connect/:id → navigate directly to chat
   const handleConnect = async () => {
     if (!currentStudent) return;
-    const res = await connectStudent(currentStudent.id);
-    setConnectedName(res.data?.name ?? '');
-    setShowModal(true);
-    setCurrentIndex(prev => prev + 1);
+    await connectStudent(currentStudent.id);
+    navigate('/chat', { state: { openUser: buildOpenUser(currentStudent) } });
   };
 
   const handleRestart = () => {
-    // Reload fresh list
     setLoading(true);
     setCurrentIndex(0);
     getStudents().then(res => {
@@ -48,41 +56,36 @@ const Discover = () => {
     });
   };
 
+  // Open chat from list view
+  const handleListItemClick = (student) => {
+    navigate('/chat', { state: { openUser: buildOpenUser(student) } });
+  };
+
   return (
     <>
       <Navbar />
 
-      {/* CONNECT MODAL */}
-      <div className={`modal-ov ${showModal ? 'show' : ''}`}>
-        <div className="match-modal">
-          <div className="mm-sparkle">🎉</div>
-          <div className="mm-title">Connect!</div>
-          <div className="mm-sub">{connectedName}-тай холбогдохыг хүсэж байна!</div>
-          <div className="mm-avs">
-            <div className="mm-av">😊</div>
-            <div className="mm-heart">🤝</div>
-            <div className="mm-av" style={{ background: currentStudent ? getAvatarColor(currentStudent.id) : '' }}>
-              {students[currentIndex - 1]?.avatar ?? '👤'}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button className="btn btn-p btn-full" onClick={() => setShowModal(false)}>💬 Чат эхлүүлэх</button>
-            <button className="btn btn-s btn-full" onClick={() => setShowModal(false)}>Дараа</button>
-          </div>
-        </div>
-      </div>
-
       <div className="app-shell">
+        {/* Sidebar navigation */}
         <aside className="icon-nav">
           <div className="nav-logo-sm">N</div>
-          <div className="n-ico on">💫</div>
-          <div className="n-ico">💬<div className="n-badge">3</div></div>
-          <div className="n-ico">🤝</div>
+          <div className="n-ico on" title="Discover">💫</div>
+          <div className="n-ico" title="Чат" onClick={() => navigate('/chat')}>💬</div>
+          <div className="n-ico" title="Хуваарь" onClick={() => navigate('/schedule')}>📅</div>
           <div className="n-sep"></div>
-          <div className="n-ico">📅</div>
-          <div className="n-ico">👑</div>
-          <div className="n-ico">⚙️</div>
-          <div className="nav-ava">😊</div>
+          <div className="n-ico" title="Premium" onClick={() => navigate('/premium')}>👑</div>
+          <div className="n-ico" title="Тохиргоо" onClick={() => navigate('/setup')}>⚙️</div>
+          <div
+            className="nav-ava"
+            title="Профайл"
+            onClick={() => navigate('/setup')}
+            style={{ cursor: 'pointer' }}
+          >
+            {(() => {
+              const raw = localStorage.getItem('auth_user');
+              try { const u = JSON.parse(raw); return u.avatar || '😊'; } catch { return '😊'; }
+            })()}
+          </div>
         </aside>
 
         <main className="feed-main">
@@ -113,9 +116,17 @@ const Discover = () => {
                 {currentIndex < students.length ? (
                   <div className="sw-card">
                     <div className="sw-photo" style={{ background: getAvatarColor(currentStudent.id) }}>
-                      <div className="sw-emo">{currentStudent.avatar}</div>
+                      {currentStudent.avatarUrl ? (
+                        <img
+                          src={currentStudent.avatarUrl}
+                          alt={currentStudent.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div className="sw-emo">{currentStudent.avatar}</div>
+                      )}
                       <div className="sw-badge-top">📅 {currentStudent.match}% таарсан</div>
-                      <div className="sw-online">● {currentStudent.status === 'online' ? 'Онлайн' : 'Офлайн'}</div>
+                      <div className="sw-online">● {currentStudent.isOnline ? 'Онлайн' : 'Офлайн'}</div>
                     </div>
                     <div className="sw-info">
                       <div className="sw-name">
@@ -160,11 +171,15 @@ const Discover = () => {
                 <div
                   key={student.id}
                   className="user-card"
-                  onClick={() => { setConnectedName(student.name); setShowModal(true); }}
+                  onClick={() => handleListItemClick(student)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="u-av" style={{ background: getAvatarColor(student.id) }}>
-                    {student.avatar}
-                    {student.status === 'online' && <div className="u-dot"></div>}
+                    {student.avatarUrl
+                      ? <img src={student.avatarUrl} alt={student.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                      : student.avatar
+                    }
+                    {student.isOnline && <div className="u-dot"></div>}
                   </div>
                   <div className="u-info">
                     <div className="u-namerow">

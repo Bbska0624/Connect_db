@@ -1,15 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './landing.css';
 import Navbar from '../../shared/Navbar';
 import { getStats } from '../../services/statsService';
 
 const Landing = () => {
   const [stats, setStats] = useState(null);
+  const navigate = useNavigate();
 
-  // GET /api/stats — populate hero counters
+  const featuresRef   = useRef(null);
+  const howItWorksRef = useRef(null);
+
   useEffect(() => {
     getStats().then(res => { if (res.success) setStats(res.data); });
   }, []);
+
+  const scrollTo = (ref) => ref.current?.scrollIntoView({ behavior: 'smooth' });
 
   const fmt = (val, suffix = '') =>
     stats == null
@@ -21,17 +27,21 @@ const Landing = () => {
       <Navbar />
 
       <div className="land">
-        {/* Дотоод nav */}
+        {/* Inner nav */}
         <nav className="land-nav">
           <div className="land-logo">
             Num<span>Connect</span>
             <span className="logo-badge">МУИС</span>
           </div>
           <div className="land-links">
-            <span className="land-link">Онцлог</span>
-            <span className="land-link">Хэрхэн ажилладаг</span>
-            <span className="land-link">Premium</span>
-            <button className="btn btn-p" style={{ padding: '10px 24px', fontSize: '13px' }}>
+            <span className="land-link" onClick={() => scrollTo(featuresRef)}>Онцлог</span>
+            <span className="land-link" onClick={() => scrollTo(howItWorksRef)}>Хэрхэн ажилладаг</span>
+            <span className="land-link" onClick={() => navigate('/premium')}>Premium</span>
+            <button
+              className="btn btn-p"
+              style={{ padding: '10px 24px', fontSize: '13px' }}
+              onClick={() => navigate('/login')}
+            >
               Нэвтрэх →
             </button>
           </div>
@@ -53,8 +63,8 @@ const Landing = () => {
             хичээлийн хуваарьдаа тохирсон оюутнуудтай холбогд.
           </p>
           <div className="land-btns">
-            <button className="btn btn-p">Үнэгүй эхлэх →</button>
-            <button className="btn btn-s">Хэрхэн ажилладаг вэ</button>
+            <button className="btn btn-p" onClick={() => navigate('/login')}>Үнэгүй эхлэх →</button>
+            <button className="btn btn-s" onClick={() => scrollTo(howItWorksRef)}>Хэрхэн ажилладаг вэ</button>
           </div>
 
           {/* Phone mockups */}
@@ -89,7 +99,7 @@ const Landing = () => {
           </div>
         </div>
 
-        {/* Stats — data from GET /api/stats */}
+        {/* Stats */}
         <div className="stats-row">
           <div className="stat-item">
             <span className="stat-n">{fmt(stats?.activeUsers)}</span>
@@ -109,8 +119,39 @@ const Landing = () => {
           </div>
         </div>
 
+        {/* How it works */}
+        <div ref={howItWorksRef} id="how-it-works" className="hiw-section">
+          <div className="feat-hd">Хэрхэн ажилладаг вэ?</div>
+          <div className="feat-sub">3 энгийн алхамаар эхлээрэй</div>
+          <div className="hiw-steps">
+            <div className="hiw-step">
+              <div className="hiw-num">1</div>
+              <div className="hiw-ico">📧</div>
+              <div className="hiw-title">Outlook-аар нэвтрэх</div>
+              <div className="hiw-p">@stud.num.edu.mn хаягаараа нэвтэрч, профайлаа үүсгэ. Зөвхөн МУИС оюутнуудад нэвтрэх боломжтой.</div>
+            </div>
+            <div className="hiw-step">
+              <div className="hiw-num">2</div>
+              <div className="hiw-ico">📅</div>
+              <div className="hiw-title">Хуваарь тохируулах</div>
+              <div className="hiw-p">Долоо хоногийн чөлөөт болон хичээлтэй цагаа хялбархан тэмдэглэ. Систем автоматаар таарцыг тооцооллоно.</div>
+            </div>
+            <div className="hiw-step">
+              <div className="hiw-num">3</div>
+              <div className="hiw-ico">🤝</div>
+              <div className="hiw-title">Оюутнуудтай холбогдох</div>
+              <div className="hiw-p">Хуваарьтай таарсан оюутнуудыг олж, дотноо чатлаж, хамт суралцаарай.</div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <button className="btn btn-p" style={{ fontSize: '15px', padding: '14px 36px' }} onClick={() => navigate('/login')}>
+              Одоо эхлэх →
+            </button>
+          </div>
+        </div>
+
         {/* Features */}
-        <div className="feat-section">
+        <div ref={featuresRef} id="features" className="feat-section">
           <div className="feat-hd">Яагаад NumConnect вэ?</div>
           <div className="feat-sub">Зүгээр л танилцах биш — зорилготой хамтрагч ол</div>
           <div className="feat-grid">

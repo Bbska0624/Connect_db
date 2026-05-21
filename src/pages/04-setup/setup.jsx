@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './setup.css';
 import Navbar from '../../shared/Navbar';
@@ -29,7 +29,6 @@ const MBTI_GROUPS = [
 const Setup = () => {
   const navigate = useNavigate();
 
-  // Form state — initialised from GET /api/profile/me
   const [name,      setName]      = useState('');
   const [major,     setMajor]     = useState('Программ хангамж');
   const [year,      setYear]      = useState(3);
@@ -39,6 +38,11 @@ const Setup = () => {
   const [mbti,      setMbti]      = useState(null);
   const [instagram, setInstagram] = useState('');
   const [facebook,  setFacebook]  = useState('');
+
+  // Photo upload state
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarBase64,  setAvatarBase64]  = useState('');
+  const fileInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
@@ -59,10 +63,30 @@ const Setup = () => {
         setMbti(p.mbti ?? null);
         setInstagram(p.instagram ?? '');
         setFacebook(p.facebook ?? '');
+        if (p.avatarUrl) {
+          setAvatarPreview(p.avatarUrl);
+          setAvatarBase64(p.avatarUrl);
+        }
       }
       setLoading(false);
     });
   }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Зурагны хэмжээ 2MB-аас хэтрэхгүй байх ёстой');
+      return;
+    }
+    setError(null);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setAvatarPreview(ev.target.result);
+      setAvatarBase64(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const toggleInterest = (item) =>
     setInterests(prev =>
@@ -79,7 +103,9 @@ const Setup = () => {
     setError(null);
     setSuccess(null);
     setSaving(true);
-    const res = await updateProfile({ name, major, year, bio, interests, goals, mbti, instagram, facebook });
+    const payload = { name, major, year, bio, interests, goals, mbti, instagram, facebook };
+    if (avatarBase64) payload.avatarUrl = avatarBase64;
+    const res = await updateProfile(payload);
     setSaving(false);
     if (res.success) {
       setSuccess(res.message);
@@ -125,14 +151,46 @@ const Setup = () => {
           {error   && <div className="api-error">{error}</div>}
           {success && <div className="api-success">{success}</div>}
 
-          {/* Photo upload (UI only) */}
+          {/* Photo upload */}
           <div className="fg">
-            <div className="lbl">Профайл зураг <span className="req">*</span> <span className="lbl-h">— 1–5</span></div>
+            <div className="lbl">Профайл зураг <span className="lbl-h">— 2MB хүртэл</span></div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
             <div className="photo-grid">
-              <div className="ph-main">
-                <div className="ph-main-plus">+</div>
-                <div className="ph-main-lbl">Гол зураг</div>
-                <div className="ph-main-badge">ГОЛ</div>
+              <div
+                className="ph-main"
+                onClick={() => fileInputRef.current?.click()}
+                style={avatarPreview ? { padding: 0, overflow: 'hidden' } : {}}
+              >
+                {avatarPreview ? (
+                  <>
+                    <img
+                      src={avatarPreview}
+                      alt="Profile"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div className="ph-main-badge">ГОЛ</div>
+                    <div style={{
+                      position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', transition: '.2s',
+                    }}
+                      className="ph-overlay"
+                    >
+                      <span style={{ color: '#fff', fontSize: 13, fontWeight: 700, opacity: 0 }} className="ph-change-lbl">Солих</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="ph-main-plus">+</div>
+                    <div className="ph-main-lbl">Гол зураг</div>
+                    <div className="ph-main-badge">ГОЛ</div>
+                  </>
+                )}
               </div>
               {[2,3,4,5].map(n => (
                 <div key={n} className="ph-sec">
