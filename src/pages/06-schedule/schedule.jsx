@@ -20,6 +20,7 @@ const Schedule = () => {
   const [loading,    setLoading]    = useState(true);
   const [saving,     setSaving]     = useState(false);
   const [success,    setSuccess]    = useState(false);
+  const [error,      setError]      = useState('');
 
   // GET /api/schedule/me (with localStorage fast-path)
   useEffect(() => {
@@ -59,6 +60,7 @@ const Schedule = () => {
   const handleSave = async () => {
     setSaving(true);
     setSuccess(false);
+    setError('');
     const cellArray = Object.entries(cells).map(([key, type]) => {
       const [day, hour] = key.split('-').map(Number);
       return { day, hour, type };
@@ -68,6 +70,8 @@ const Schedule = () => {
     if (res.success) {
       setSuccess(true);
       setTimeout(() => navigate('/discover'), 800);
+    } else {
+      setError(res.message || 'Хуваарь хадгалахад алдаа гарлаа');
     }
   };
 
@@ -162,6 +166,7 @@ const Schedule = () => {
         </div>
 
         {success && <div className="api-success" style={{ marginTop: '12px' }}>✓ Хуваарь амжилттай хадгалагдлаа</div>}
+        {error && <div className="api-error" style={{ marginTop: '12px' }}>⚠ {error}</div>}
 
         {/* Action buttons */}
         <div className="sched-btns">
