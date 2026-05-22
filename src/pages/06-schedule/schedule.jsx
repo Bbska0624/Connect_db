@@ -67,7 +67,7 @@ const Schedule = () => {
     setSaving(false);
     if (res.success) {
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 2500);
+      setTimeout(() => navigate('/discover'), 800);
     }
   };
 
